@@ -35,6 +35,53 @@ where:
 3. **Termination:** Stop when no merge increases modularity further.  
 4. **Output:** Final community partition with maximum modularity.
 
+---
 
+## 📊 Time Complexity Analysis
+
+Let:
+
+* **n** = number of nodes
+* **m** = number of edges
+* **c** = number of communities (initially **n**)
+
+---
+
+### 🔹 1. Modularity Computation
+
+Each call to `modularity()` iterates over all pairs of nodes **within the same community**.
+
+[
+\text{Time Complexity: } O(n^2)
+]
+
+---
+
+### 🔹 2. Merge Evaluation
+
+At each iteration, all pairs of communities are tested for modularity gain → roughly **O(c²)** merges.
+Each merge recomputes modularity (**O(n²)**), leading to:
+
+[
+O(c^2 \times n^2)
+]
+
+Initially **c ≈ n**, giving a **worst-case time complexity of O(n⁴)**.
+However, since communities merge quickly and most real-world graphs are sparse,
+the **practical runtime** is approximately:
+
+[
+O(n^3)
+]
+
+---
+
+### 🔹 3. Space Complexity
+
+| Component                    | Space     |
+| ---------------------------- | --------- |
+| Adjacency list & degree maps | O(n + m)  |
+| Community lists              | O(n)      |
+| **Total Space**              | **O(n²)** |
 
 ---
