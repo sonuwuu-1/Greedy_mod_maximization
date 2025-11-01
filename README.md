@@ -37,7 +37,7 @@ where:
 
 ---
 
-## 📊 Time Complexity Analysis
+## Time Complexity Analysis
 
 Let:
 
