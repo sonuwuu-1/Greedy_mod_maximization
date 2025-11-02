@@ -1,40 +1,55 @@
-# Greedy Modularity Maximization for Community Detection
+# Greedy Modularity Maximization for Community Detection 
 
 ## Overview
 
-This project implements a **simplified version** of the **Greedy Modularity Maximization algorithm** for community detection in graphs.
-The algorithm identifies **communities (clusters)** in a network by **maximizing modularity**, which measures the strength of a community structure.
+This project demonstrates a **simple educational implementation** of the **Greedy Modularity Maximization algorithm** for community detection in networks.
+It follows the same principle as the **NetworkX built-in function** `greedy_modularity_communities()` but uses only **NetworkX** (no itertools or external libraries).
 
-It produces results **similar to NetworkX’s built-in** `greedy_modularity_communities()` function, but with a **simpler and more educational** approach.
-
----
-
-## What is Community Detection?
-
-Community detection aims to divide a graph into groups of nodes (communities) such that:
-
-* There are **many edges within communities**, and
-* **Few edges between communities**.
-
-The **modularity (Q)** of a partition measures how well the network is divided:
-
-**Q = (1 / 2m) × Σᵢⱼ [Aᵢⱼ − (kᵢ × kⱼ) / (2m)] × δ(cᵢ, cⱼ)**
-
-where:
-
-* **Aᵢⱼ** = 1 if edge exists between i and j, else 0
-* **kᵢ, kⱼ** = degrees of nodes i and j
-* **m** = total number of edges
-* **δ(cᵢ, cⱼ)** = 1 if nodes i and j are in the same community
+The algorithm detects **communities (clusters)** by maximizing the **modularity (Q)** of the graph — a measure of how well nodes are grouped based on edge density.
 
 ---
 
-## Algorithm Workflow
+## What is Modularity?
+
+Modularity quantifies how well a network is divided into communities.
+
+**Formula:**
+
+```
+Q = (1 / (2m)) * Σ_ij [A_ij - (k_i * k_j) / (2m)] δ(c_i, c_j)
+```
+
+Where:
+
+* `A_ij`: 1 if an edge exists between i and j, else 0
+* `k_i, k_j`: degrees of nodes i and j
+* `m`: total number of edges
+* `δ(c_i, c_j)`: 1 if nodes i and j are in the same community
+
+---
+
+## ⚙️ ΔM Formula (Used for Merging)
+
+To decide which communities to merge, we compute the **change in modularity (ΔM_AB)**:
+
+```
+ΔM_AB = (l_AB / L) - ((k_A * k_B) / (2 * L²))
+```
+
+Where:
+
+* `l_AB`: number of edges between communities A and B
+* `k_A`, `k_B`: sum of degrees of nodes in A and B
+* `L`: total number of edges in the graph
+
+---
+
+## Algorithm Steps
 
 1. **Initialization:** Each node starts as its own community.
-2. **Iteration:** Compute modularity gain for all possible community merges and merge the pair with the highest increase.
-3. **Termination:** Stop when no merge increases modularity further.
-4. **Output:** Final community partition with maximum modularity.
+2. **Merge Step:** For every pair of communities, compute ΔM_AB and merge the pair with the highest positive gain.
+3. **Iteration:** Repeat until no merge improves modularity.
+4. **Output:** Final set of communities with maximum modularity.
 
 ---
 
@@ -44,37 +59,26 @@ Let:
 
 * **n** = number of nodes
 * **m** = number of edges
-* **c** = number of communities (initially **n**)
+* **c** = number of communities (initially n)
+
+### Modularity Computation
+
+Each ΔM computation iterates over node pairs in two communities → `O(n²)`.
+
+### Merge Evaluation
+
+Every iteration checks all community pairs → `O(c²)` merges.
+Each merge recomputes ΔM → `O(n²)`.
+Hence, total complexity ≈ **O(c² × n²)**.
+Initially `c ≈ n`, so worst-case **O(n⁴)**, but practically **O(n³)** for sparse graphs.
+
+### Space Complexity
+
+| Component               | Space     |
+| ----------------------- | --------- |
+| Adjacency & degree maps | O(n + m)  |
+| Community storage       | O(n)      |
+| **Total**               | **O(n²)** |
 
 ---
 
-### 🔹 1. Modularity Computation
-
-Each call to `modularity()` iterates over all pairs of nodes **within the same community**.
-
-**Time Complexity:** O(n²)
-
----
-
-### 🔹 2. Merge Evaluation
-
-At each iteration, all pairs of communities are tested for modularity gain → roughly **O(c²)** merges.
-Each merge recomputes modularity (**O(n²)**), leading to:
-
-**O(c² × n²)**
-
-Initially **c ≈ n**, giving a **worst-case time complexity of O(n⁴)**.
-However, since communities merge quickly and most real-world graphs are sparse,
-the **practical runtime** is approximately:
-
-**O(n³)**
-
----
-
-### 🔹 3. Space Complexity
-
-| Component                    | Space     |
-| ---------------------------- | --------- |
-| Adjacency list & degree maps | O(n + m)  |
-| Community lists              | O(n)      |
-| **Total Space**              | **O(n²)** |
